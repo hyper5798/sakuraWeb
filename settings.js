@@ -12,5 +12,9 @@ module.exports = {
   name: '200000109',
   pw: '57381042',
   gIoTopic:'client/200000109/200000109-GIOT-MAKER',
-  hour : 60*60*1000
+  hour : 60*60*1000,
+  api_key : 'HA-45058956',
+  api_secret :'0744424235',
+  S5_query_url :'https://s5.securepilot.com/v1/device/data_query',
+  Service_query_url :'hhttps://service.securepilot.com/v1/device/data_query',
 };

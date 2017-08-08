@@ -900,3 +900,21 @@ h1.page-header {
 .fixed-table-pagination .pagination-detail {
 	margin-top: 20px;
 }
+input[type=checkbox] {
+    zoom: 2;
+}
+
+.modal-dialog,
+.modal-content {
+    /* 80% of window height */
+    height: 75%;
+}
+
+.modal-body {
+    /* 100% = dialog height, 120px = header + footer */
+    max-height: calc(100% - 130px);
+    overflow-y: scroll;
+}
+.modal-footer {
+  max-height:10%;
+}

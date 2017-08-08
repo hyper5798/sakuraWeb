@@ -71,6 +71,7 @@ var setting = {
       msgTools:require("./models/msgTools.js"),
       listeDbTools:require("./models/listDbTools.js"),
       settings:require("./settings.js"),
+      cloud:require("./models/cloud.js"),
     }    // enables global context
 };
 

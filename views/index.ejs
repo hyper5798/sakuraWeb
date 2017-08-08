@@ -49,4 +49,50 @@
 						</table>
 						<input type="hidden" id="type" name="type" value="<%= type%>">
 					<% } %>
+					<!-- （Modal） -->
+					<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+						aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content"  >
+								<div class="modal-header " style="background-color:#357ebd;">
+									<button type="button" class="close"
+									data-dismiss="modal" aria-hidden="true">
+										&times;
+									</button>
+									<h3 class="modal-title" id="myModalLabel">
+										<p style="color:white">Filter</p>
+									</h3>
+								</div>
+
+								<div class="modal-body">
+									<div class="col-md-12" >
+<!-- checkbox - 1 -->
+									    <input tabindex="1" type="checkbox" id="input-1">
+<!-- checkbox - 2 -->             		<label for="input-1">Date</label>
+									    <input tabindex="2" type="checkbox" id="input-2">
+                                		<label for="input-2">Mac</label>
+                                        <hr>
+                                        <label>From :</label>
+										<input type="text" id="startDate" name="startDate" size="10"  readonly>
+										<input type="button" value="..." id="BTN" name="BTN"><br>
+                                        <hr>
+                                        <label>&nbsp;&nbsp;To&nbsp;&nbsp;&nbsp; :</label>
+										<input type="text" id="endDate" name="endDate" size="10"  readonly>
+										<input type="button" value="..." id="BTN2" name="BTN2"><br>
+										<hr>
+										<label>&nbsp;Mac&nbsp; :</label>
+										<input type="text" id="mac" name="mac" size="10"  >
+              					    </div>
+
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default"
+									data-dismiss="modal">Close
+									</button>
+									<button type="button" onClick="toQuery()" class="btn btn-primary">
+									OK
+									</button>
+								</div>
+							</div><!-- /.modal-content -->
+					</div><!-- /.modal-dialog -->
 <%- include page/footer %>
