@@ -42,50 +42,9 @@ module.exports = function(app) {
   	    var now = new Date().getTime();
 		var selectObj = JsonFileTools.getJsonFromFile(selectPath);
         var user = req.session.user;
-		ListDbTools.findByName('finalist',function(err,lists){
-			if(err){
-				res.render('index', { title: 'Index',
-					success: '',
-					error: err.toString(),
-					finalList:null,
-					type:type,
-					user:user
-				});
-			}else{
-                var finalList = lists[0]['list'];
-				var unitObj = JsonFileTools.getJsonFromFile(unitPath);
-
-				//console.log('finalList :'+JSON.stringify(finalList));
-				if(finalList){
-					var keys = Object.keys(finalList);
-					console.log('Index finalList :'+keys.length);
-					for(var i=0;i<keys.length ;i++){
-						//console.log( i + ') mac : ' + keys[i] +'=>' + JSON.stringify(finalList[keys[i]]));
-						//console.log(i+' result : '+ ((now - finalList[keys[i]].timestamp)/hour));
-						finalList[keys[i]].overtime = true;
-						if( ((now - finalList[keys[i]].timestamp)/hour) < 2 )  {
-							finalList[keys[i]].overtime = false;
-						}
-						finalList[keys[i]].name = '';
-						//console.log(i+' keys[i] : '+ keys[i]);
-						//console.log(i+' unitObj[keys[i]] : '+ unitObj[keys[i]]);
-						if( unitObj[keys[i]] )  {
-							finalList[keys[i]].name = unitObj[keys[i]];
-						}
-					}
-				}else{
-					finalList = null;
-				}
-
-				res.render('index', { title: 'Index',
-					success: null,
-					error: null,
-					finalList:finalList,
-					type:type,
-					user:user,
-					select:selectObj
-				});
-			}
+		res.render('index', { title: 'Index',
+			user:user,
+			select:selectObj
 		});
   });
 
@@ -216,7 +175,7 @@ module.exports = function(app) {
 				}
 			}
 			console.log('Debug account get -> users:'+users.length+'\n'+users);
-			
+
 			//console.log('Debug account get -> user:'+mUser.name);
 			res.render('user/account', { title: 'Account', // user/account : ejs path
 				user:myuser,//current user : administrator
@@ -286,7 +245,7 @@ module.exports = function(app) {
 
 		}else{//Edit modej
 			console.log('postSelect :'+typeof(postSelect) );
-			
+
 			var json = {enable:(postSelect==="false")?false:true};
 
 			console.log('updateUser json:'+json );

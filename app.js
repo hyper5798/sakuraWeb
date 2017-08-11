@@ -8,7 +8,7 @@ var todos = require('./routes/todos');//Jason add on 2016.09.26
 var routes = require('./routes/index');
 var todos = require('./routes/todos');//Jason add on 2017.02.21
 //Jason add on 2017.02.16 - start
-var RED = require("node-red");
+//var RED = require("node-red");
 var http = require('http'),
     https = require('https');
 var session = require('express-session');
@@ -61,7 +61,7 @@ UserDbTools.findUserByName("admin",function(err,user){
 
 
 // Create the settings object - see default settings.js file for other options
-var setting = {
+/*var setting = {
     httpAdminRoot:"/red",
     httpNodeRoot: "/",
     userDir:"./.nodered/",
@@ -73,18 +73,18 @@ var setting = {
       settings:require("./settings.js"),
       cloud:require("./models/cloud.js"),
     }    // enables global context
-};
+};*/
 
 // Initialise the runtime with a server and settings
-RED.init(server,setting);
+//RED.init(server,setting);
 
 // Serve the editor UI from /red
-app.use(setting.httpAdminRoot,RED.httpAdmin);
+//app.use(setting.httpAdminRoot,RED.httpAdmin);
 
 // Serve the http nodes UI from /api
-app.use(setting.httpNodeRoot,RED.httpNode);
+//app.use(setting.httpNodeRoot,RED.httpNode);
 
 server.listen(port);
 
 // Start the runtime
-RED.start();
+//RED.start();
