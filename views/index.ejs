@@ -1,4 +1,11 @@
 ﻿<%- include page/header %>
+<!--<div class="bs-example">
+    <div class="alert alert-warning alert-dismissible" role="alert">
+      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+      <strong>Warning!</strong> Better check yourself, you're not looking too good.
+    </div>
+  </div>-->
+
                     <div class="top-bg">
 					</div>
 					<% if(user.enable === false) { %>
@@ -34,28 +41,29 @@
 										&times;
 									</button>
 									<h3 class="modal-title" id="myModalLabel">
-										<p style="color:white">Filter</p>
+										<p style="color:white">Option</p>
 									</h3>
 								</div>
 
 								<div class="modal-body">
 									<div class="col-md-12" >
-<!-- checkbox - 1 -->
-									    <input tabindex="1" type="checkbox" id="input-1">
-<!-- checkbox - 2 -->             		<label for="input-1">Date</label>
+<!-- checkbox  -->
+									    <!-- <input tabindex="1" type="checkbox" id="input-1">
+           		                        <label for="input-1">Date</label>
 									    <input tabindex="2" type="checkbox" id="input-2">
                                 		<label for="input-2">Mac</label>
-                                        <hr>
+                                        <hr> -->
                                         <label>From :</label>
 										<input type="text" id="startDate" name="startDate" size="10"  readonly>
 										<input type="button" value="..." id="BTN" name="BTN"><br>
                                         <hr>
                                         <label>&nbsp;&nbsp;To&nbsp;&nbsp;&nbsp; :</label>
 										<input type="text" id="endDate" name="endDate" size="10"  readonly>
-										<input type="button" value="..." id="BTN2" name="BTN2"><br>
+										<input type="button" value="..." id="BTN2" name="BTN2">
 										<hr>
 										<label>&nbsp;Mac&nbsp; :</label>
-										<input type="text" id="mac" name="mac" size="10" value ="1c497b48bb40">
+										<select name="mac" class="selectpicker" id="mac">
+										</select>
               					    </div>
 
 								</div>
@@ -63,8 +71,8 @@
 									<button type="button" class="btn btn-default"
 									data-dismiss="modal">Close
 									</button>
-									<button type="button" onClick="toQuery()" class="btn btn-primary">
-									OK
+									<button type="button" onClick="firstQuery()" class="btn btn-primary">
+									Query
 									</button>
 								</div>
 							</div><!-- /.modal-content -->

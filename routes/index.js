@@ -1,16 +1,11 @@
 ﻿var express = require('express');
 var router = express.Router();
-var DeviceDbTools = require('../models/deviceDbTools.js');
-var ListDbTools = require('../models/listDbTools.js');
-var UnitDbTools = require('../models/unitDbTools.js');
 var UserDbTools =  require('../models/userDbTools.js');
+var cloud =  require('../models/cloud.js');
 var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
-var path = './public/data/finalList.json';
-var unitPath = './public/data/unit.json';
-var selectPath = './public/data/select.json';
-var hour = 60*60*1000;
-var type = 'gps';
+var sessionPath = './public/data/session.json';
+
 
 function findUnitsAndShowSetting(req,res,isUpdate){
 	UnitDbTools.findAllUnits(function(err,units){
@@ -38,50 +33,10 @@ function findUnitsAndShowSetting(req,res,isUpdate){
 
 module.exports = function(app) {
   app.get('/', checkLogin);
-  app.get('/', function (req, res) {
-  	    var now = new Date().getTime();
-		var selectObj = JsonFileTools.getJsonFromFile(selectPath);
-        var user = req.session.user;
+  app.get('/', function (req, res) { 
 		res.render('index', { title: 'Index',
-			user:user,
-			select:selectObj
+			user:req.session.user
 		});
-  });
-
-  app.get('/evices', checkLogin);
-  app.get('/devices', function (req, res) {
-	var mac = req.query.mac;
-	var type = req.query.type;
-	var date = req.query.date;
-	var option = req.query.option;
-    var user = req.session.user;
-	req.session.type = type;
-	DeviceDbTools.findDevicesByDate(date,mac,Number(0),'desc',function(err,devices){
-		if(err){
-			console.log('find name:'+find_mac);
-			return;
-		}
-		var length = 15;
-		if(devices.length<length){
-			length = devices.length;
-		}
-
-		/*devices.forEach(function(device) {
-			console.log('mac:'+device.date + ', data :' +device.data);
-		});*/
-
-		res.render('devices', { title: 'Device',
-			devices: devices,
-			success: req.flash('success').toString(),
-			error: req.flash('error').toString(),
-			type:req.session.type,
-			mac:mac,
-			date:date,
-			option:option,
-			length:length,
-			user:user
-		});
-	});
   });
 
   app.get('/login', checkNotLogin);
@@ -117,6 +72,16 @@ module.exports = function(app) {
 				//login success
 				if(password == user.password){
 					req.session.user = user;
+					cloud.getToken(
+						function(err,session){
+							if(err){
+								JsonFileTools.saveJsonToFile(sessionPath,{});
+							}else{
+								JsonFileTools.saveJsonToFile(sessionPath,session);
+							}
+						}
+					);
+					
 					return res.redirect('/');
 				}else{
 					//login fail
@@ -177,7 +142,7 @@ module.exports = function(app) {
 			console.log('Debug account get -> users:'+users.length+'\n'+users);
 
 			//console.log('Debug account get -> user:'+mUser.name);
-			res.render('user/account', { title: 'Account', // user/account : ejs path
+			res.render('user/account', { title: 'Account', // user/account 
 				user:myuser,//current user : administrator
 				users:newUsers,//All users
 				error: errorMessae,

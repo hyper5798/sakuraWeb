@@ -907,12 +907,12 @@ input[type=checkbox] {
 .modal-dialog,
 .modal-content {
     /* 80% of window height */
-    height: 75%;
+    height: 68%;
 }
 
 .modal-body {
     /* 100% = dialog height, 120px = header + footer */
-    max-height: calc(100% - 130px);
+    /*max-height: calc(100% - 120px);*/
     overflow-y: scroll;
 }
 .modal-footer {

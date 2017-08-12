@@ -59,32 +59,4 @@ UserDbTools.findUserByName("admin",function(err,user){
   }
 });
 
-
-// Create the settings object - see default settings.js file for other options
-/*var setting = {
-    httpAdminRoot:"/red",
-    httpNodeRoot: "/",
-    userDir:"./.nodered/",
-    functionGlobalContext: {
-      momentModule:require("moment"),
-      deviceDbTools:require("./models/deviceDbTools.js"),
-      msgTools:require("./models/msgTools.js"),
-      listeDbTools:require("./models/listDbTools.js"),
-      settings:require("./settings.js"),
-      cloud:require("./models/cloud.js"),
-    }    // enables global context
-};*/
-
-// Initialise the runtime with a server and settings
-//RED.init(server,setting);
-
-// Serve the editor UI from /red
-//app.use(setting.httpAdminRoot,RED.httpAdmin);
-
-// Serve the http nodes UI from /api
-//app.use(setting.httpNodeRoot,RED.httpNode);
-
 server.listen(port);
-
-// Start the runtime
-//RED.start();

@@ -18,7 +18,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="\"><span>Node</span>Admin</a>
+				<a class="navbar-brand" href="\"><span>Sakura</span>Admin</a>
 				<% if(user){ %>
 					<ul class="user-menu">
 						<li class="dropdown pull-right">
@@ -79,12 +79,17 @@
 						  	<font color="red"><label id="alert"></label></font>
 						  </div>
 						  <div class="col-sm-1">
-							    <select name="codici_transazioni" class="selectpicker pull-right" id="codici_transazioni" >
+							    <select name="codici_transazioni" class="selectpicker pull-right" id="codici_transazioni" onchange="find()">
 							    </select>
 						  </div>
 						  <div class="col-sm-1" >
 						        <font color="blue"><label id="lblTotalPage"> / 16</label></font>
 						  </div>
+						  <div class="col-sm-1">
+								<button  type="button" name="search" title="search" onClick="search()">
+								    <span class="fa fa-search fa-2x"></span>
+								</button>
+						   </div>
 						  <div class="col-sm-1">
 							    <button  type="button" name="refresh" title="Refresh" onClick="refresh()">
 								    <span class="fa fa-refresh fa-2x"></span>
@@ -93,11 +98,7 @@
 						  <div class="col-sm-1">
 						        <div id="buttons"></div>
 						  </div>
-						  <div class="col-sm-1">
-								<button  type="button" name="filter" title="Filter" onClick="test()">
-								    <span class="fa fa-filter fa-2x"></span>
-								</button>
-						   </div>
+
 						   <div class="col-sm-2"></div>
 						</div>
                         <hr>

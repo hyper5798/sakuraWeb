@@ -1,11 +1,7 @@
 var express = require('express');
 var router = express.Router();
-//var UnitDbTools = require('../models/unitDbTools.js');
-var DeviceDbTools = require('../models/deviceDbTools.js');
 var JsonFileTools =  require('../models/jsonFileTools.js');
-var ListDbTools = require('../models/listDbTools.js');
 var moment = require('moment');
-var hour = 60*60*1000;
 var cloud = require('../models/cloud.js');
 
 router.route('/query')
@@ -19,6 +15,17 @@ router.route('/query')
 		var limit    = req.query.limit;
 		var total    = req.query.total;
 		cloud.query(mac, startDate, endDate, index, limit, total,function(err,results){
+              if (err)
+				return res.send(err);
+			  return res.json(results);
+		});
+	});
+
+router.route('/device_list')
+
+	// get all the bears (accessed at GET http://localhost:8080/api/bears)
+	.get(function(req, res) {
+		cloud.getDeviceList(function(err,results){
               if (err)
 				return res.send(err);
 			  return res.json(results);
