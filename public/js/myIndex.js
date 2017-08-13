@@ -6,9 +6,10 @@ var initBtnStr ="#pir";
 var host = window.location.hostname;
 var port = window.location.port;
 var cal1,cal2;
-var index = 0;limit = 100;
+var index = 0;limit = 1000;
 var isNeedTotal = true;
 var date1 ,date2 , deviceList;
+var range;
 
 var opt2={
    dom: 'lrtip',
@@ -28,9 +29,10 @@ var buttons = new $.fn.dataTable.Buttons(table, {
           text: 'CSV',
           //title: $("#startDate").val()+'-'+$("#endDate").val(),
           filename: function(){
-                var d = $("#startDate").val();
+                /*var d = $("#startDate").val();
                 var n = $("#endDate").val();
-                return 'file-'+d+'-' + n;
+                return 'file-'+d+'-' + n;*/
+                return range;
             },
           footer: true,
           bom : true
@@ -139,28 +141,46 @@ function loadDoc(queryType,url) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
        //document.getElementById("alert").innerHTML = this.responseText;
-       var type = this.getResponseHeader("Content-Type");   // 取得回應類型
        $.LoadingOverlay("hide");
-            // 判斷回應類型，這裡使用 JSON
+
+       var type = this.getResponseHeader("Content-Type");   // 取得回應類型
+       console.log('type  : '+type);
+
+        // 判斷回應類型，這裡使用 JSON
         if (type.indexOf("application/json") === 0) {
             var json = JSON.parse(this.responseText);
             //console.log('json  : '+JSON.stringify(json));
             if(queryType === 'query'){
-              console.log('Show query list');
-              if(json.data && json.data.length>0){
-                  //console.log('type.indexOf(data) data : '+json.data.length);
-                  table.fnAddData(json.data);
-                  changeDateOfFilename(json.data[0],json.data[json.data.length-1]);
-              }
+                console.log('Show query list');
+                if(json.data && json.data.length>0){
+                    //console.log('type.indexOf(data) data : '+json.data.length);
+                    table.fnAddData(json.data);
+                }
 
-              console.log('total  : '+ json.total );
+                console.log('total  : '+ json.total );
+                
 
-              if( json.total && json.total > limit){
-                showPage(json.total);
-              }
+                if( json.total && json.total > limit){
+                  showPage(json.total);
+                }
+                if(json.range){
+                  
+                  if( $('#codici_transazioni') ){
+                    var select = $('#codici_transazioni').val();
+                    //alert(select);
+                    range = $('#mac').val()+'_'+json.range +'-'+ ( Number(select) +1 );
+                  }else{
+                    range = $('#mac').val()+'_'+json.range +'-1';
+                  }
+                }
             }else if(queryType === "device_list"){
-              //Show device list
-              toShowDevice(json.device_list);
+                //Show device list
+                if(json.device_list){
+                    toShowDevice(json.device_list);
+                }else{
+                    //Show alert
+                    alert('Unable get device list!');
+                }
             }
         }
     }
@@ -181,11 +201,6 @@ function getMac(item){
   //console.log('getMac :\n'+JSON.stringify(item));
   var tmp = item.mac +' - '+item.name;
   return tmp;
-}
-
-function changeDateOfFilename(firstItem,lastItem){
-    console.log('firstItem:'+JSON.stringify(firstItem));
-    console.log('lastItem:'+JSON.stringify(lastItem));
 }
 
 $(document).ready(function(){

@@ -40,9 +40,12 @@ function getToken(callback) {
             return callback(error, session);
         }
         else{
-            console.log('Code : ' + response.statusCode)
-            console.log('error : ' + error)
-            console.log('body : ' + body)
+            if(response){
+                console.log('Code : ' + response.statusCode);
+                console.log('error : ' + error);
+                console.log('body : ' + body);
+            }
+            
             return callback(error, null);
         }
     });
@@ -122,17 +125,23 @@ function query(mac, startDate, endDate , index, limit, flag, callback) {
         var now = new Date();
         endDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
     }
-    var toMoment = moment(endDate,"YYYY-MM-DD").add(1,'days');
-    var to = moment(toMoment,"YYYY-MM-DD").toDate().getTime();
+    //Start day + 1 exp: 2017/8/13  => 2017/8/14 00:00:00 
+    var toMoment = moment(endDate,"YYYY/MM/DD").add(1,'days');
+    var to = moment(toMoment,"YYYY/MM/DD").toDate().getTime();
     form.to = to;
+    var range2 = moment(endDate,"YYYYMMDD").format("YYYYMMDD");
     //console.log('to : '+timeConverter(to));
 
     if(startDate || startDate.length<8){
-        startDate =  moment(endDate,"YYYY-MM-DD").subtract(7,'days');
+        var fromMoment = moment(endDate,"YYYY/MM/DD").subtract(7,'days');;
+        startDate =  fromMoment.format("YYYY/MM/DD");
         //startDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
     }
-    var from = moment(startDate,"YYYY-MM-DD").toDate().getTime();
+    var from = moment(startDate,"YYYY/MM/DD").toDate().getTime();
     form.from = from;
+    var range1 = moment(startDate,"YYYYMMDD").format("YYYYMMDD");
+    var range = range1 + '-' + range2;
+    
     //console.log('from : '+timeConverter(from));
 
     request.post(url,{form:form},
@@ -159,7 +168,7 @@ function query(mac, startDate, endDate , index, limit, flag, callback) {
                     var arr = [];
                 }
                     
-                var json = {"data" : arr};
+                var json = {"data" : arr , "range":range};
 
                 if(flag === "true"){
                     json.total = total;
