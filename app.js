@@ -4,18 +4,17 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var todos = require('./routes/todos');//Jason add on 2016.09.26
+var todos = require('./routes/todos');
 var routes = require('./routes/index');
-var todos = require('./routes/todos');//Jason add on 2017.02.21
-//Jason add on 2017.02.16 - start
-//var RED = require("node-red");
+var todos = require('./routes/todos');
 var http = require('http'),
     https = require('https');
 var session = require('express-session');
 var settings = require('./settings');
 var flash = require('connect-flash');
-var UserDbTools =  require('./models/userDbTools.js');
-//Jason add on 2017.02.16 - end
+var JsonFileTools =  require('./models/jsonFileTools.js');
+var userPath =  './public/data/user.json';
+var moment = require('moment');
 var app = express();
 
 var port = process.env.PORT || 3000;
@@ -43,20 +42,16 @@ app.use('/todos', todos);
 routes(app);
 var server = http.createServer(app);
 
-UserDbTools.findUserByName("admin",function(err,user){
-  if(err){
-    errorMessae = err;
-    res.render('user/login', { title: 'Login',
-      error: errorMessae
-    });
-  }
-  if(user == null ){
-    UserDbTools.saveUser("admin","gemtek12345","",0,function(err,result){
-      if(err){
-        console.log('Create admin fail !');
-      }
-    });
-  }
-});
+try {
+		var userObj = JsonFileTools.getJsonFromFile(userPath);
+}
+catch (event) {
+    userObj = {};
+}
+
+if(userObj.admin === undefined){
+    userObj.admin = {"name":"admin","password":settings.api_secret,"level":0,"enable":true,"date":moment().format("YYYY/MM/DD hh:mm:ss")};
+    JsonFileTools.saveJsonToFile(userPath,userObj);
+}
 
 server.listen(port);

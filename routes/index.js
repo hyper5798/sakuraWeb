@@ -1,11 +1,12 @@
 ﻿var express = require('express');
 var router = express.Router();
-var UserDbTools =  require('../models/userDbTools.js');
+var crypto = require('crypto');
 var cloud =  require('../models/cloud.js');
 var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
 var sessionPath = './public/data/session.json';
-
+var userPath =  './public/data/user.json';
+var moment = require('moment');
 
 function findUnitsAndShowSetting(req,res,isUpdate){
 	UnitDbTools.findAllUnits(function(err,units){
@@ -33,7 +34,7 @@ function findUnitsAndShowSetting(req,res,isUpdate){
 
 module.exports = function(app) {
   app.get('/', checkLogin);
-  app.get('/', function (req, res) { 
+  app.get('/', function (req, res) {
 		res.render('index', { title: 'Index',
 			user:req.session.user
 		});
@@ -55,43 +56,56 @@ module.exports = function(app) {
 		var password = req.flash('post_password').toString();
 
 		console.log('Debug register get -> password:'+ password);
-		UserDbTools.findUserByName(name,function(err,user){
-			if(err){
-				errorMessae = err;
-				res.render('user/login', { title: 'Login',
-					error: errorMessae
-				});
-			}
-			if(user == null ){
-				//login fail
-				errorMessae = 'The account is invalid';
-				res.render('user/login', { title: 'Login',
-					error: errorMessae
-				});
-			}else{
-				//login success
-				if(password == user.password){
-					req.session.user = user;
-					cloud.getToken(
-						function(err,session){
-							if(err){
-								JsonFileTools.saveJsonToFile(sessionPath,{});
-							}else{
-								JsonFileTools.saveJsonToFile(sessionPath,session);
-							}
-						}
-					);
-					
-					return res.redirect('/');
-				}else{
-					//login fail
-					errorMessae = 'The password is invalid';
-					res.render('user/login', { title: 'Login',
-						error: errorMessae
-					});
+
+		try {
+			var userObj = JsonFileTools.getJsonFromFile(userPath);
+		}
+		catch (event) {
+			userObj = {};
+		}
+		//if(user == null ){
+		if(userObj[name] === undefined){
+			//login fail
+			errorMessae = 'The account is invalid';
+			res.render('user/login', { title: 'Login',
+				error: errorMessae
+			});
+		}else{
+			//login success
+			//if(password == user.password){
+			if(password == userObj[name]['password']){
+				req.session.user = userObj[name];
+				try {
+					var sessionObj = JsonFileTools.getJsonFromFile(sessionPath);
 				}
+				catch (event) {
+					sessionObj = {};
+				}
+				if(sessionObj.expiration){
+					var expiration = new Date(sessionObj.expiration);
+					var now = new Date();
+					if(now.getTime() > expiration.getTime()){
+						cloud.getToken(
+							function(err,session){
+								if(err){
+									JsonFileTools.saveJsonToFile(sessionPath,{});
+								}else{
+									JsonFileTools.saveJsonToFile(sessionPath,session);
+								}
+							}
+						);
+					}
+				}
+
+				return res.redirect('/');
+			}else{
+				//login fail
+				errorMessae = 'The password is invalid';
+				res.render('user/login', { title: 'Login',
+					error: errorMessae
+				});
 			}
-		});
+		}
 	}
   });
 
@@ -117,37 +131,38 @@ module.exports = function(app) {
 		console.log('render to account.ejs');
 		var refresh = req.flash('refresh').toString();
 		var myuser = req.session.user;
-		var myusers = req.session.userS;
 		var successMessae,errorMessae;
 		var post_name = req.flash('name').toString();
 
 		console.log('Debug account get -> refresh :'+refresh);
-		UserDbTools.findAllUsers(function (err,users){
-			if(err){
-				errorMessae = err;
-			}
-			if(refresh == 'delete'){
-				successMessae = 'Delete account ['+post_name+'] is finished!';
-			}else if(refresh == 'edit'){
-				successMessae = 'Edit account ['+post_name+'] is finished!';
-			}
-			req.session.userS = users;
-			var newUsers = [];
-			for(var i=0;i<  users.length;i++){
-				//console.log('name : '+users[i]['name']);
-				if( users[i]['name'] !== 'admin'){
-					newUsers.push(users[i]);
-				}
-			}
-			console.log('Debug account get -> users:'+users.length+'\n'+users);
 
-			//console.log('Debug account get -> user:'+mUser.name);
-			res.render('user/account', { title: 'Account', // user/account 
-				user:myuser,//current user : administrator
-				users:newUsers,//All users
-				error: errorMessae,
-				success: successMessae
-			});
+		try {
+			var userObj = JsonFileTools.getJsonFromFile(userPath);
+		}
+		catch (event) {
+			userObj = {};
+		}
+		if(refresh == 'delete'){
+			successMessae = 'Delete account ['+post_name+'] is finished!';
+		}else if(refresh == 'edit'){
+			successMessae = 'Edit account ['+post_name+'] is finished!';
+		}
+		var newUsers = [];
+		var keys = Object.keys(userObj);
+		for(var i=0;i<  keys.length;i++){
+			//console.log('name : '+users[i]['name']);
+			if( keys[i] !== 'admin'){
+				newUsers.push(userObj[keys[i]]);
+			}
+		}
+		console.log('Debug account get -> users:'+newUsers.length+'\n'+newUsers);
+
+		//console.log('Debug account get -> user:'+mUser.name);
+		res.render('user/account', { title: 'Account', // user/account
+			user:myuser,//current user : administrator
+			users:newUsers,//All users
+			error: errorMessae,
+			success: successMessae
 		});
     });
 
@@ -159,74 +174,32 @@ module.exports = function(app) {
 		console.log('postSelect:'+postSelect);
 		var successMessae,errorMessae;
 		req.flash('name',post_name);//For refresh users data
+		try {
+			var userObj = JsonFileTools.getJsonFromFile(userPath);
+		}
+		catch (event) {
+			userObj = {};
+		}
 
 		if(postSelect == ""){//Delete mode
-			UserDbTools.removeUserByName(post_name,function(err,result){
-				if(err){
-					console.log('removeUserByName :'+post_name+ " fail! \n" + err);
-					errorMessae = err;
-				}else{
-					console.log('removeUserByName :'+post_name + 'success');
-					successMessae = successMessae;
-				}
-				UserDbTools.findAllUsers(function (err,users){
-					console.log('Search account count :'+users.length);
-				});
-				req.flash('refresh','delete');//For refresh users data
-				return res.redirect('/account');
-			});
+
+			delete userObj[post_name];
+
 		}else if(postSelect == "new"){//New account
+
 			var	password = req.body.password;
-			UserDbTools.findUserByName(post_name,function(err,user){
-				if(err){
-					errorMessae = err;
-					res.render('user/register', { title: '註冊',
-						error: errorMessae
-					});
-				}
-				console.log('Debug register user -> name: '+user);
-				if(user != null ){
-					errorMessae = 'Have the same account!';
-					res.render('user/account', { title: 'Account',
-						error: errorMessae
-					});
-				}else{
-					//save database
-					var level = 1;
-					if(post_name == 'admin'){
-						level = 0;
-					}
-					UserDbTools.saveUser(post_name,password,'',level,function(err,result){
-						if(err){
-							errorMessae = '註冊帳戶失敗';
-							res.render('user/register', { title: 'Account',
-								error: errorMessae
-							});
-						}
-						return res.redirect('/account');
-					});
-				}
-			});
+            userObj[post_name] = {"name":post_name,"password":password,"level":1,"enable":true,"date":moment().format("YYYY/MM/DD hh:mm:ss")};
+		
+	    }else{//Edit modej
 
-		}else{//Edit modej
 			console.log('postSelect :'+typeof(postSelect) );
-
-			var json = {enable:(postSelect==="false")?false:true};
-
-			console.log('updateUser json:'+json );
-
-			UserDbTools.updateUser(post_name,json,function(err,result){
-				if(err){
-					console.log('updateUser :'+post_name + err);
-					errorMessae = err;
-				}else{
-					console.log('updateUser :'+post_name + 'success');
-					successMessae = successMessae;
-				}
-				req.flash('refresh','edit');//For refresh users data
-				return res.redirect('/account');
-			});
+			userObj[post_name]['enable'] = (postSelect==="false")?false:true ;
 		}
+		JsonFileTools.saveJsonToFile(userPath,userObj);
+		setTimeout(function() {
+			return res.redirect('/account');
+		}, 500);
+
   	});
 };
 

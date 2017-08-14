@@ -1,13 +1,14 @@
 var opt2={
-    dom: 'frtip',
+    //dom: 'frtip',
     scrollY: 250,
+    "iDisplayLength":100
 };
 var table = $('#table1').dataTable(opt2);
 
 $(document).ready(function () {
     var enable = $('[name=enable]');
     //alert(enable.length);
-
+   
     setTimeout(function(){
         //do what you need here
         //document.getElementById('result').innerText = '';

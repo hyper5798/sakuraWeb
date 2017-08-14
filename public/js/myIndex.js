@@ -6,7 +6,7 @@ var initBtnStr ="#pir";
 var host = window.location.hostname;
 var port = window.location.port;
 var cal1,cal2;
-var index = 0;limit = 1000;
+var index = 0;limit = 100;
 var isNeedTotal = true;
 var date1 ,date2 , deviceList;
 var range;
@@ -94,7 +94,7 @@ function showPage(total){
   for (var i=0; i< page ; i ++) {
       $('#codici_transazioni').append("<option value=" + i + "> " + "<i>" + (i+1)+ "</i></option>");
   }
-  var num = "/ &nbsp;&nbsp;"+ page;
+  var num = "&nbsp;&nbsp; / &nbsp;&nbsp;"+ page;
   $("#lblTotalPage").html(num);
 }
 

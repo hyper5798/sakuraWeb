@@ -1,6 +1,6 @@
 {
   "name": "SakuraWeb",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -14,7 +14,6 @@
     "express": "~4.13.4",
     "express-session": "^1.15.1",
     "moment": "^2.17.1",
-    "mongoose": "~4.5.1",
     "morgan": "~1.7.0",
     "mqtt": "^1.11.2",
     "request": "^2.81.0",
