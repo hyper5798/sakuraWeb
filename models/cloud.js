@@ -16,7 +16,7 @@ var tmp = [{
             "time":"1502150400"
             }];
 var servicePath = './public/data/service.json';
-var serviceMap = JsonFileTools.getJsonFromFile(servicePath);
+var serviceMap;
 
 function getToken(callback) {
     var name = settings.name;
@@ -229,6 +229,14 @@ function getType(p) {
 }
 
 function getDataList(list){
+    try {
+			serviceMap = JsonFileTools.getJsonFromFile(servicePath);
+		}
+		catch (err) {
+            console.log('get serviceMap :'+err);
+			serviceMap = {};
+		}
+    
     var arr = [];
     for(var i = 0;i<list.length;i++){
         arr.push(getData(list[i]));
@@ -257,7 +265,13 @@ function getData(json){
     arr.push(myDate);
     arr.push(myTime);
     arr.push(data.SERVICE_ID);
-    arr.push(serviceMap[data.SERVICE_ID]);
+    data.SERVICE_ID = '4a';
+    var res = data.SERVICE_ID.toUpperCase();
+    if(serviceMap[res]){
+        arr.push(serviceMap[data.SERVICE_ID]);
+    }else{
+        arr.push('未知');
+    }
     arr.push(data.length);
     arr.push(data.DATA_0);
     arr.push(data.DATA_1);

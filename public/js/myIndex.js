@@ -6,7 +6,7 @@ var initBtnStr ="#pir";
 var host = window.location.hostname;
 var port = window.location.port;
 var cal1,cal2;
-var index = 0;limit = 100;
+var index = 0;limit = 1000;
 var isNeedTotal = true;
 var date1 ,date2 , deviceList;
 var range;
