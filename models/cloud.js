@@ -265,10 +265,11 @@ function getData(json){
     arr.push(myDate);
     arr.push(myTime);
     arr.push(data.SERVICE_ID);
-    data.SERVICE_ID = '4a';
+
     var res = data.SERVICE_ID.toUpperCase();
+
     if(serviceMap[res]){
-        arr.push(serviceMap[data.SERVICE_ID]);
+        arr.push(serviceMap[res]);
     }else{
         arr.push('未知');
     }
