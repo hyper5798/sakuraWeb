@@ -15,6 +15,7 @@ var flash = require('connect-flash');
 var JsonFileTools =  require('./models/jsonFileTools.js');
 var userPath =  './public/data/user.json';
 var moment = require('moment');
+var crypto = require('crypto');
 var app = express();
 
 var port = process.env.PORT || 3000;
@@ -50,7 +51,9 @@ catch (event) {
 }
 
 if(userObj.admin === undefined){
-    userObj.admin = {"name":"admin","password":settings.api_secret,"level":0,"enable":true,"date":moment().format("YYYY/MM/DD hh:mm:ss")};
+	var md5 = crypto.createHash('md5');
+    var	password = md5.update(settings.api_secret).digest('hex');
+    userObj.admin = {"name":"admin","password":password,"level":0,"enable":true,"date":moment().format("YYYY/MM/DD hh:mm:ss")};
     JsonFileTools.saveJsonToFile(userPath,userObj);
 }
 

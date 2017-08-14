@@ -54,6 +54,8 @@ module.exports = function(app) {
 		});
 	}else{
 		var password = req.flash('post_password').toString();
+		var md5 = crypto.createHash('md5');
+        password = md5.update(password).digest('hex');
 
 		console.log('Debug register get -> password:'+ password);
 
@@ -187,7 +189,8 @@ module.exports = function(app) {
 
 		}else if(postSelect == "new"){//New account
 
-			var	password = req.body.password;
+			var md5 = crypto.createHash('md5');
+            var	password = md5.update(req.body.password).digest('hex');
             userObj[post_name] = {"name":post_name,"password":password,"level":1,"enable":true,"date":moment().format("YYYY/MM/DD hh:mm:ss")};
 		
 	    }else{//Edit modej
