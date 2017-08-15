@@ -8,8 +8,17 @@ var port = window.location.port;
 var cal1,cal2;
 var index = 0;limit = 1000;
 var isNeedTotal = true;
-var date1 ,date2 , deviceList;
-var range;
+var now = new Date();
+var yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+var date2 =  (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() ), 
+    date1 =  (yesterday.getFullYear() + '/' + (yesterday.getMonth() + 1) + '/' + yesterday.getDate() ) ;
+console.log('date1 :' + date1);
+console.log('date2 :' + date2);
+$('#startDate').val(date1);
+$('#endDate').val(date1);
+var range, deviceList;
 
 var opt2={
    dom: 'lrtip',
@@ -42,6 +51,7 @@ var buttons = new $.fn.dataTable.Buttons(table, {
 }).container().appendTo($('#buttons'));
 
 function search(){
+  
   $('#myModal').modal('show');
 }
 
@@ -208,7 +218,7 @@ $(document).ready(function(){
         //do what you need here
         var mUrl = 'http://'+host+":"+port+'/todos/device_list';
         loadDoc("device_list",mUrl)
-    }, 3000);
+    }, 1000);
 
     cal1 =new Calendar({
         inputField: "startDate",
@@ -229,40 +239,6 @@ $(document).ready(function(){
         showTime: false,
         onSelect: function() {this.hide();}
     });
-
-   /*$('#input-1').iCheck({
-    checkboxClass: 'icheckbox_flat-red',
-    radioClass: 'iradio_flat-red'
-  });
-   $('#input-2').iCheck({
-    checkboxClass: 'icheckbox_flat-red',
-    radioClass: 'iradio_flat-red'
-    });
-
-  $('#input-1').on('ifToggled', function(event){
-
-      if( $("#input-1").prop("checked") ) {
-         //alert('input-1 ifToggled checked');
-         enableBtn();
-       } else {
-         //alert('input-1 ifToggled unchecked');
-         disableBtn();
-       }
-  });
-
-  $('#input-2').on('ifToggled', function(event){
-
-      if( $("#input-2").prop("checked") ) {
-         //alert('input-2 ifToggled checked');
-         enableMac();
-       } else {
-         //alert('input-2 ifToggled unchecked');
-         disableMac();
-       }
-
-  });*/
-  //disableBtn();
-  //disableMac();
   hidePaging();
 });
 

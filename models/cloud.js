@@ -17,6 +17,13 @@ var tmp = [{
             }];
 var servicePath = './public/data/service.json';
 var serviceMap;
+try {
+        serviceMap = JsonFileTools.getJsonFromFile(servicePath);
+    }
+    catch (err) {
+        console.log('get serviceMap :'+err);
+        serviceMap = {};
+    }
 
 function getToken(callback) {
     var name = settings.name;
@@ -121,7 +128,7 @@ function query(mac, startDate, endDate , index, limit, flag, callback) {
         form.mac = mac;
     }
 
-    if(endDate || endDate.length<8){
+    if(endDate===null || endDate===undefined || endDate.length<8){
         var now = new Date();
         endDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
     }
@@ -132,7 +139,7 @@ function query(mac, startDate, endDate , index, limit, flag, callback) {
     var range2 = moment(endDate,"YYYYMMDD").format("YYYYMMDD");
     //console.log('to : '+timeConverter(to));
 
-    if(startDate || startDate.length<8){
+    if(startDate===null || startDate===undefined || startDate.length<8){
         var fromMoment = moment(endDate,"YYYY/MM/DD").subtract(7,'days');;
         startDate =  fromMoment.format("YYYY/MM/DD");
         //startDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
@@ -140,7 +147,12 @@ function query(mac, startDate, endDate , index, limit, flag, callback) {
     var from = moment(startDate,"YYYY/MM/DD").toDate().getTime();
     form.from = from;
     var range1 = moment(startDate,"YYYYMMDD").format("YYYYMMDD");
-    var range = range1 + '-' + range2;
+    if(range1 === range2){
+         var range = range1;
+    }else{
+         var range = range1 + '-' + range2;
+    }
+   
     
     //console.log('from : '+timeConverter(from));
 
@@ -229,13 +241,6 @@ function getType(p) {
 }
 
 function getDataList(list){
-    try {
-			serviceMap = JsonFileTools.getJsonFromFile(servicePath);
-		}
-		catch (err) {
-            console.log('get serviceMap :'+err);
-			serviceMap = {};
-		}
     
     var arr = [];
     for(var i = 0;i<list.length;i++){
