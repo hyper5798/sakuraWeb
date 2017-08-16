@@ -12,12 +12,12 @@ var now = new Date();
 var yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 
-var date2 =  (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() ), 
-    date1 =  (yesterday.getFullYear() + '/' + (yesterday.getMonth() + 1) + '/' + yesterday.getDate() ) ;
+var date2 =  now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate(),
+    date1 =  yesterday.getFullYear() + '/' + (yesterday.getMonth() + 1) + '/' + yesterday.getDate() ;
 console.log('date1 :' + date1);
 console.log('date2 :' + date2);
 $('#startDate').val(date1);
-$('#endDate').val(date1);
+$('#endDate').val(date2);
 var range, deviceList;
 
 var opt2={
@@ -51,7 +51,7 @@ var buttons = new $.fn.dataTable.Buttons(table, {
 }).container().appendTo($('#buttons'));
 
 function search(){
-  
+
   $('#myModal').modal('show');
 }
 
@@ -116,11 +116,33 @@ function find() {
     toQuery();
 }
 
+function btn2(){
+    //alert('btn2()');
+    //cal2.moveTo(new Date(),true);
+    cal1.hide();
+}
+
+function btn(){
+    //alert('btn()');
+    //cal1.moveTo(new Date(),true);
+    cal2.hide();
+}
+
+function hideCal(){
+  cal1.hide();
+  cal2.hide();
+}
+
+function closeDialog(){
+   hideCal();
+   $('#myModal').modal('hide');
+}
+
 function firstQuery(){
+  closeDialog();
   index = 0;
   isNeedTotal = true;
   hidePaging();
-  //alert('firstQuery() total='+isNeedTotal);
   toQuery();
 }
 
@@ -128,17 +150,23 @@ function toQuery(){
   //alert($("#startDate").val());
   console.log('toQuery()');
   $.LoadingOverlay("show");
-  $('#myModal').modal('hide');
   table.fnClearTable();
   var mac = $('#mac').val();
-  var from = $('#startDate').val();
-  var to = $('#endDate').val();
-  if(document.getElementById("startDate").value === ''){
-      to = date;
+  var from = $('#startDate').val()+' '+$('#time1').val();
+  var to = $('#endDate').val()+' '+$('#time2').val();
+  var d1 = new Date( from );
+  var d2 = new Date( to );
+  //alert('from ='+from+' =>'+ d1.getTime() );
+  //alert('to ='+to+'=>'+ d2.getTime() );
+  if(d1.getTime() > d2.getTime()){
+      $.LoadingOverlay("hide");
+      alert('Start time is greater than end time  !\nPlease select date again.');
+      return;
   }
-  //alert('toQuery() total='+isNeedTotal);
-  var url = 'http://'+host+":"+port+'/todos/query?mac='+mac+'&from='+from+'&to='+to+'&index='+index+'&limit='+limit+'&total='+isNeedTotal;
-  console.log(url);
+
+  var url = 'http://'+host+":"+port+'/todos/query?mac='+mac+'&from='+d1.getTime()+'&to='+d2.getTime()+'&index='+index+'&limit='+limit+'&total='+isNeedTotal;
+  //alert(url);
+  
   if(isNeedTotal){
     isNeedTotal = !isNeedTotal;
   }
@@ -168,13 +196,13 @@ function loadDoc(queryType,url) {
                 }
 
                 console.log('total  : '+ json.total );
-                
+
 
                 if( json.total && json.total > limit){
                   showPage(json.total);
                 }
                 if(json.range){
-                  
+
                   if( $('#codici_transazioni') ){
                     var select = $('#codici_transazioni').val();
                     //alert(select);
@@ -222,23 +250,23 @@ $(document).ready(function(){
 
     cal1 =new Calendar({
         inputField: "startDate",
-        dateFormat: "%Y/%m/%d",
-        trigger: "BTN",
+        dateFormat: "%Y-%m-%d",
+        trigger: "startDate",
         bottomBar: true,
-        weekNumbers: true,
         showTime: false,
         onSelect: function() {this.hide();}
     });
 
     cal2 = new Calendar({
         inputField: "endDate",
-        dateFormat: "%Y/%m/%d",
-        trigger: "BTN2",
+        dateFormat: "%Y-%m-%d",
+        trigger: "endDate",
         bottomBar: true,
-        weekNumbers: true,
         showTime: false,
         onSelect: function() {this.hide();}
     });
+    $('#time1').timepicker({ 'timeFormat': 'H:i:s' });
+    $('#time2').timepicker({ 'timeFormat': 'H:i:s' });
   hidePaging();
 });
 

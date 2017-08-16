@@ -116,46 +116,24 @@ function store(title, content, city,area,town,callback) {
     });
 }
 
-function query(mac, startDate, endDate , index, limit, flag, callback) {
+function query(mac, from, to , index, limit, flag, callback) {
     var url = server + settings.query,
         time = new Date().getTime().toString();
 
     var api_token = get_ApiToken(time);
-    var form = { index:index, limit:limit,api_key:settings.api_key,
-                       api_token:api_token, time:time};
+    var form = { mac:mac,from:from,to:to,index:index, limit:limit,
+                       api_key:settings.api_key,api_token:api_token, time:time};
 
-    if(mac && mac.length>8){
-        form.mac = mac;
-    }
+    var range2 = dateConverter(Number(to));
+    var range1 = dateConverter(Number(from));
 
-    if(endDate===null || endDate===undefined || endDate.length<8){
-        var now = new Date();
-        endDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
-    }
-    //Start day + 1 exp: 2017/8/13  => 2017/8/14 00:00:00 
-    var toMoment = moment(endDate,"YYYY/MM/DD").add(1,'days');
-    var to = moment(toMoment,"YYYY/MM/DD").toDate().getTime();
-    form.to = to;
-    var range2 = moment(endDate,"YYYYMMDD").format("YYYYMMDD");
-    //console.log('to : '+timeConverter(to));
-
-    if(startDate===null || startDate===undefined || startDate.length<8){
-        var fromMoment = moment(endDate,"YYYY/MM/DD").subtract(7,'days');;
-        startDate =  fromMoment.format("YYYY/MM/DD");
-        //startDate = (now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() );
-    }
-    var from = moment(startDate,"YYYY/MM/DD").toDate().getTime();
-    form.from = from;
-    var range1 = moment(startDate,"YYYYMMDD").format("YYYYMMDD");
     if(range1 === range2){
          var range = range1;
     }else{
          var range = range1 + '-' + range2;
     }
+    console.log(new Date()+'Date range : '+range);
    
-    
-    //console.log('from : '+timeConverter(from));
-
     request.post(url,{form:form},
         function(err, result) {
             if(err) {
@@ -215,20 +193,37 @@ function get_ApiToken(time) {
 }
 
 function dateConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp*1000);
+  var a = new Date(UNIX_timestamp);
   //var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = a.getMonth()+1;
-  var date = a.getDate();
-  var date = year +'/'+month+'/'+date ;
+  var year  = a.getFullYear();
+
+  if( ( a.getMonth()+1 ) <10)
+    var month  = '0'+ ( a.getMonth()+1 );
+  else
+    var month  = ''+ ( a.getMonth()+1 );
+
+  if(a.getDate()<10)
+    var date  = '0'+a.getDate();
+  else
+    var date  = ''+a.getDate();
+
+  if(a.getHours()<10)
+    var hour   = '0'+a.getHours();
+  else
+    var hour  = ''+a.getHours();
+  
+  if(a.getMinutes()<10)
+    var min   = '0'+a.getMinutes();
+  else
+    var min  = ''+a.getMinutes();
+  
+  var date = year+month+date+hour+min ;
   return date;
 }
 
 function timeConverter(UNIX_timestamp){
   var a = new Date(UNIX_timestamp*1000);
-  var hour = a.getHours();
-  var min = a.getMinutes();
-  var sec = a.getSeconds();
+ 
   var time = hour + ':' + min + ':' + sec ;
   return time;
 }
@@ -257,16 +252,12 @@ function getData(json){
     }
     var data = arrData[0];
     var account = json._source.account;
-    var reportTime = moment(json._source.report_timestamp, 'YYYY-MM-DD hh:mm:ss');
+    var reportTime = moment(json._source.report_timestamp, 'YYYY-MM-DD hh:mm:ssZ');
     var myDate = reportTime.format('YYYY-MM-DD');
-    var myTime = reportTime.format('hh:mm:ss');
-    //arr.push(timeConverter(data.time));
+    var myTime = reportTime.format('HH:mm:ss');
 
     arr.push(account.mac);
     arr.push(account.gid);
-    //console.log(typeof(reportTime));
-    //arr.push(dateConverter(data.time));
-    //arr.push(timeConverter(data.time));
     arr.push(myDate);
     arr.push(myTime);
     arr.push(data.SERVICE_ID);
@@ -282,4 +273,8 @@ function getData(json){
     arr.push(data.DATA_0);
     arr.push(data.DATA_1);
     return arr;
+}
+
+function createDateAsUTC(date) {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()));
 }

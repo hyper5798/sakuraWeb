@@ -4,6 +4,7 @@ module.exports = {
   dbhost: 'localhost',
   dbport: 27017,
   dbpath: 'mongodb://localhost/sakura',
+  debug:true,
   name:"sakura_march",
   pw: '0920856300',
   api_key : 'HA-45058956',

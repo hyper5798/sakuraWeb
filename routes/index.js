@@ -48,6 +48,27 @@ module.exports = function(app) {
 	console.log('Debug register get -> name:'+ name);
 
 	if(name ==''){
+		try {
+			var sessionObj = JsonFileTools.getJsonFromFile(sessionPath);
+		}
+		catch (event) {
+			sessionObj = {};
+		}
+		if(sessionObj.expiration){
+			var expiration = new Date(sessionObj.expiration);
+			var now = new Date();
+			if(now.getTime() > expiration.getTime() || settings.debug === true){
+				cloud.getToken(
+					function(err,session){
+						if(err){
+							JsonFileTools.saveJsonToFile(sessionPath,{});
+						}else{
+							JsonFileTools.saveJsonToFile(sessionPath,session);
+						}
+					}
+				);
+			}
+		}
 		errorMessae = '';
 		res.render('user/login', { title: 'Login',
 			error: errorMessae
@@ -77,28 +98,6 @@ module.exports = function(app) {
 			//if(password == user.password){
 			if(password == userObj[name]['password']){
 				req.session.user = userObj[name];
-				try {
-					var sessionObj = JsonFileTools.getJsonFromFile(sessionPath);
-				}
-				catch (event) {
-					sessionObj = {};
-				}
-				if(sessionObj.expiration){
-					var expiration = new Date(sessionObj.expiration);
-					var now = new Date();
-					if(now.getTime() > expiration.getTime()){
-						cloud.getToken(
-							function(err,session){
-								if(err){
-									JsonFileTools.saveJsonToFile(sessionPath,{});
-								}else{
-									JsonFileTools.saveJsonToFile(sessionPath,session);
-								}
-							}
-						);
-					}
-				}
-
 				return res.redirect('/');
 			}else{
 				//login fail
