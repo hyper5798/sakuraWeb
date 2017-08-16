@@ -221,11 +221,43 @@ function dateConverter(UNIX_timestamp){
   return date;
 }
 
-function timeConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp*1000);
- 
-  var time = hour + ':' + min + ':' + sec ;
-  return time;
+function getTimeByTimestamp(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp);
+  if(a.getHours()<10)
+    var hour   = '0'+a.getHours();
+  else
+    var hour  = ''+a.getHours();
+  
+  if(a.getMinutes()<10)
+    var min   = '0'+a.getMinutes();
+  else
+    var min  = ''+a.getMinutes();
+
+  if(a.getSeconds()<10)
+    var second   = '0'+a.getSeconds();
+  else
+    var second  = ''+a.getSeconds();
+
+  var date =hour+':'+min+':'+second;
+  return date;
+}
+
+function getDateByTimestamp(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp);
+  var year  = a.getFullYear();
+
+  if( ( a.getMonth()+1 ) <10)
+    var month  = '0'+ ( a.getMonth()+1 );
+  else
+    var month  = ''+ ( a.getMonth()+1 );
+
+  if(a.getDate()<10)
+    var date  = '0'+a.getDate();
+  else
+    var date  = ''+a.getDate();
+
+  var date = year+'/'+month+'/'+date ;
+  return date;
 }
 
 function getType(p) {
@@ -252,9 +284,12 @@ function getData(json){
     }
     var data = arrData[0];
     var account = json._source.account;
-    var reportTime = moment(json._source.report_timestamp, 'YYYY-MM-DD hh:mm:ssZ');
-    var myDate = reportTime.format('YYYY-MM-DD');
-    var myTime = reportTime.format('HH:mm:ss');
+    //var reportTime = moment(json._source.report_timestamp, 'YYYY-MM-DD hh:mm:ssZ');
+    //var  = reportTime.format('YYYY-MM-DD');
+    //var myTime = reportTime.format('HH:mm:ss');
+    var sort = json.sort[0];
+    var myDate = getDateByTimestamp(sort);
+    var myTime = getTimeByTimestamp(sort);
 
     arr.push(account.mac);
     arr.push(account.gid);
