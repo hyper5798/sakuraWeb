@@ -3,7 +3,7 @@ var settings = require('../settings');
 var JsonFileTools =  require('./jsonFileTools.js');
 var sessionPath = './public/data/session.json';
 var crypto = require('crypto');
-var moment = require('moment');
+var moment = require('moment-timezone');
 var settings =  require('../settings.js');
 var isS5 = true;
 var server = isS5 ? settings.s5_server : settings.service_server;
@@ -124,8 +124,10 @@ function query(mac, from, to , index, limit, flag, callback) {
     var form = { mac:mac,from:from,to:to,index:index, limit:limit,
                        api_key:settings.api_key,api_token:api_token, time:time};
 
-    var range2 = dateConverter(Number(to));
-    var range1 = dateConverter(Number(from));
+    var mTo = moment.unix(Number(to)/1000);
+    var mFrom = moment.unix(Number(from)/1000);
+    var range2 = mTo.tz(settings.timezone).format('YYYYMMDDHHmm');
+    var range1 = mFrom.tz(settings.timezone).format('YYYYMMDDHHmm');
 
     if(range1 === range2){
          var range = range1;
@@ -192,56 +194,6 @@ function get_ApiToken(time) {
     return digest;
 }
 
-function dateConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp);
-  //var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year  = a.getFullYear();
-
-  if( ( a.getMonth()+1 ) <10)
-    var month  = '0'+ ( a.getMonth()+1 );
-  else
-    var month  = ''+ ( a.getMonth()+1 );
-
-  if(a.getDate()<10)
-    var date  = '0'+a.getDate();
-  else
-    var date  = ''+a.getDate();
-
-  if(a.getHours()<10)
-    var hour   = '0'+a.getHours();
-  else
-    var hour  = ''+a.getHours();
-  
-  if(a.getMinutes()<10)
-    var min   = '0'+a.getMinutes();
-  else
-    var min  = ''+a.getMinutes();
-  
-  var date = year+month+date+hour+min ;
-  return date;
-}
-
-function getTimeByTimestamp(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp);
-  if(a.getHours()<10)
-    var hour   = '0'+a.getHours();
-  else
-    var hour  = ''+a.getHours();
-  
-  if(a.getMinutes()<10)
-    var min   = '0'+a.getMinutes();
-  else
-    var min  = ''+a.getMinutes();
-
-  if(a.getSeconds()<10)
-    var second   = '0'+a.getSeconds();
-  else
-    var second  = ''+a.getSeconds();
-
-  var date =hour+':'+min+':'+second;
-  return date;
-}
-
 function getDateByTimestamp(UNIX_timestamp){
   var a = new Date(UNIX_timestamp);
   var year  = a.getFullYear();
@@ -284,12 +236,9 @@ function getData(json){
     }
     var data = arrData[0];
     var account = json._source.account;
-    //var reportTime = moment(json._source.report_timestamp, 'YYYY-MM-DD hh:mm:ssZ');
-    //var  = reportTime.format('YYYY-MM-DD');
-    //var myTime = reportTime.format('HH:mm:ss');
-    var sort = json.sort[0];
-    var myDate = getDateByTimestamp(sort);
-    var myTime = getTimeByTimestamp(sort);
+    var reportTime = moment(json._source.report_timestamp);
+    var myDate = reportTime.tz(settings.timezone).format('YYYY-MM-DD');
+    var myTime = reportTime.tz(settings.timezone).format('HH:mm:ss');
 
     arr.push(account.mac);
     arr.push(account.gid);
@@ -308,8 +257,4 @@ function getData(json){
     arr.push(data.DATA_0);
     arr.push(data.DATA_1);
     return arr;
-}
-
-function createDateAsUTC(date) {
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()));
 }

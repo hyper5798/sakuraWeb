@@ -13,5 +13,6 @@ module.exports = {
   service_server :'https://service.securepilot.com/',
   query:"v1/device/data_query",
   login:"v1/device/login",
-  get_device_list:"v1/user/get_device_list"
+  get_device_list:"v1/user/get_device_list",
+  timezone:"Asia/Taipei"
 };
