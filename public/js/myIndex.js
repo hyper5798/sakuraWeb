@@ -159,12 +159,13 @@ function toQuery(){
   //alert('from ='+from+' =>'+ d1.getTime() );
   //alert('to ='+to+'=>'+ d2.getTime() );
   if(d1.getTime() > d2.getTime()){
+     
       $.LoadingOverlay("hide");
       alert('Start time is greater than end time  !\nPlease select date again.');
       return;
   }
 
-  var url = 'http://'+host+":"+port+'/todos/query?mac='+mac+'&from='+d1.getTime()+'&to='+d2.getTime()+'&index='+index+'&limit='+limit+'&total='+isNeedTotal;
+  var url = 'http://'+host+":"+port+'/todos/query?mac='+mac+'&from='+from+'&to='+to+'&index='+index+'&limit='+limit+'&total='+isNeedTotal;
   //alert(url);
   
   if(isNeedTotal){

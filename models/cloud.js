@@ -119,9 +119,11 @@ function store(title, content, city,area,town,callback) {
 function query(mac, from, to , index, limit, flag, callback) {
     var url = server + settings.query,
         time = new Date().getTime().toString();
+    var fromTime = moment(from).tz(settings.timezone).unix()*1000; 
+    var toTime = moment(to).tz(settings.timezone).unix()*1000; 
 
     var api_token = get_ApiToken(time);
-    var form = { mac:mac,from:from,to:to,index:index, limit:limit,
+    var form = { mac:mac,from:fromTime,to:toTime,index:index, limit:limit,
                        api_key:settings.api_key,api_token:api_token, time:time};
 
     var mTo = moment.unix(Number(to)/1000);
