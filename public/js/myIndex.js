@@ -102,9 +102,9 @@ function showPage(total){
   $('#codici_transazioni').html("");
   var page = Math.ceil( total/limit );
   for (var i=0; i< page ; i ++) {
-      $('#codici_transazioni').append("<option value=" + i + "> " + "<i>" + (i+1)+ "</i></option>");
+      $('#codici_transazioni').append("<option value=" + i + "> " + "<i>" + ((i+1)*limit)+ "</i></option>");
   }
-  var num = "&nbsp;&nbsp; / &nbsp;&nbsp;"+ page;
+  var num = total + "&nbsp;&nbsp; / &nbsp;&nbsp;"
   $("#lblTotalPage").html(num);
 }
 
@@ -159,15 +159,14 @@ function toQuery(){
   //alert('from ='+from+' =>'+ d1.getTime() );
   //alert('to ='+to+'=>'+ d2.getTime() );
   if(d1.getTime() > d2.getTime()){
-     
       $.LoadingOverlay("hide");
       alert('Start time is greater than end time  !\nPlease select date again.');
       return;
   }
-
+  $("#macText").html('<strong>MAC : '+mac+'</strong>');
   var url = 'http://'+host+":"+port+'/todos/query?mac='+mac+'&from='+from+'&to='+to+'&index='+index+'&limit='+limit+'&total='+isNeedTotal;
   //alert(url);
-  
+
   if(isNeedTotal){
     isNeedTotal = !isNeedTotal;
   }

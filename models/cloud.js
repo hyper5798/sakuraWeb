@@ -126,10 +126,10 @@ function query(mac, from, to , index, limit, flag, callback) {
     var form = { mac:mac,from:fromTime,to:toTime,index:index, limit:limit,
                        api_key:settings.api_key,api_token:api_token, time:time};
 
-    var mTo = moment.unix(Number(to)/1000);
-    var mFrom = moment.unix(Number(from)/1000);
-    var range2 = mTo.tz(settings.timezone).format('YYYYMMDDHHmm');
-    var range1 = mFrom.tz(settings.timezone).format('YYYYMMDDHHmm');
+    var mTo = moment(to).tz(settings.timezone);
+    var mFrom = moment(from).tz(settings.timezone);
+    var range2 = mTo.format('YYYYMMDDHHmm');
+    var range1 = mFrom.format('YYYYMMDDHHmm');
 
     if(range1 === range2){
          var range = range1;
