@@ -11,8 +11,10 @@ module.exports = {
   api_secret :'0744424235',
   s5_server :'https://s5.securepilot.com/',
   service_server :'https://service.securepilot.com/',
+  s5_server2 :'http://54.254.195.95:8080/',
   query:"v1/device/data_query",
   login:"v1/device/login",
+  query2:"data_records/ha-sakura-00",
   get_device_list:"v1/user/get_device_list",
   timezone:"Asia/Taipei"
 };

@@ -2,11 +2,14 @@ var request = require('request');
 var settings = require('../settings');
 var JsonFileTools =  require('./jsonFileTools.js');
 var sessionPath = './public/data/session.json';
+var devicePath = './public/data/device.json';
+var deviceList = [];
 var crypto = require('crypto');
 var moment = require('moment-timezone');
 var settings =  require('../settings.js');
-var isS5 = true;
+var isS5 = true,isS5_2 = true;
 var server = isS5 ? settings.s5_server : settings.service_server;
+var server2 = settings.s5_server2;
 var tmp = [{
             "length":6,
             "TYPE_ID":"10",
@@ -78,11 +81,12 @@ function getDeviceList(callback) {
                 //console.log('body type : '+typeof(result.body));
                 var json= JSON.parse(result.body);
                 if(json.device_list == undefined) {
-                    callback(null, false)
+                    callback(null, false);
                 }
                 else {
-                    callback(null,json)
-                }
+                    callback(null,json);
+                    JsonFileTools.saveJsonToFile(devicePath,json.device_list);
+                } 
             }
     });
 }
@@ -116,17 +120,12 @@ function store(title, content, city,area,town,callback) {
     });
 }
 
-function query(mac, from, to , index, limit, flag, callback) {
-    var url = server + settings.query,
-        time = new Date().getTime().toString();
+function query( mac, from, to , index, limit, flag, callback) {
+      
     var mTo = moment(to,'YYYY/MM/DD HH:mm').tz(settings.timezone);
     var mFrom = moment(from,'YYYY/MM/DD HH:mm').tz(settings.timezone);
     var fromTime = mFrom.unix()*1000; 
     var toTime = mTo.unix()*1000; 
-
-    var api_token = get_ApiToken(time);
-    var form = { mac:mac,from:fromTime,to:toTime,index:index, limit:limit,
-                       api_key:settings.api_key,api_token:api_token, time:time};
     var range2 = mTo.format('YYYYMMDDHHmm');
     var range1 = mFrom.format('YYYYMMDDHHmm');
 
@@ -136,25 +135,73 @@ function query(mac, from, to , index, limit, flag, callback) {
          var range = range1 + '-' + range2;
     }
     console.log(new Date()+'Date range : '+range);
-   
-    request.post(url,{form:form},
-        function(err, result) {
-            if(err) {
-                callback(err, null);
-            }
-            else {
-                //console.log('flag : '+flag);
-                //console.log('body type : '+typeof(result.body));
-                var body= JSON.parse(result.body);
-                //console.log(JSON.stringify(body));
-                var json = body.hits;
-                //console.log('total : '+JSON.stringify(body));
+    if(isS5_2 !== true){
+        var url =  server + settings.query; 
+        var time = new Date().getTime().toString();
+        var api_token = get_ApiToken(time);
+        var form = { mac:mac,from:fromTime,to:toTime,index:index, 
+                     limit:limit,api_token:api_token,api_key:settings.api_key,time:time};
+    
+        request.post(url,{form:form},
+            function(err, result) {
+                if(err) {
+                    callback(err, null);
+                }
+                else {
+                    console.log('result : '+JSON.stringify(result));
+                    console.log('body type : '+typeof(result.body));
+                    var body= JSON.parse(result.body);
+                    //console.log(JSON.stringify(body));
+                    var json = body.hits;
+                    //console.log('total : '+JSON.stringify(body));
+                    var total = json.total;
+                    console.log('total : '+total);
+                    var arrList = json.hits;
+                    //console.log('arrList : '+arrList.length);
+                    console.log('list 0 \n '+JSON.stringify(arrList[0]));
+                    console.log('list '+(arrList.length-1)+' \n '+JSON.stringify(arrList[(arrList.length-1)]));
+                    if(arrList.length>0){
+                        var arr = getDataList(arrList);
+                    }else{
+                        var arr = [];
+                    }
+                        
+                    var json = {"data" : arr , "range":range};
+    
+                    if(flag === "true"){
+                        json.total = total;
+                    }
+    
+                    if(arrList == undefined) {
+                        callback(null, false)
+                    }
+                    else {
+                        callback(null,json)
+                    }
+                }
+        });
+    }else{
+        var url = server2 + settings.query2+'/?macAddr='+mac+'&api_key='+settings.api_key
+                  +'&from=' + fromTime + '&to=' +toTime +'&limit='+limit; 
+        var options = {
+            'url': url
+        };
+        
+        request.get(options, function(error, response, body){
+            if (!error && response.statusCode == 200){
+                console.log('body : ' + body+ ', type : '+typeof(body));
+                var json = JSON.parse(body);
+                var arrList = json.value;
                 var total = json.total;
                 console.log('total : '+total);
-                var arrList = json.hits;
-                //console.log('arrList : '+arrList.length);
-                console.log('list 0 \n '+JSON.stringify(arrList[0]));
-                console.log('list '+(arrList.length-1)+' \n '+JSON.stringify(arrList[(arrList.length-1)]));
+                
+                if(total >0){
+                    //console.log('arrList : '+arrList.length);
+                    console.log('list 0 \n '+JSON.stringify(arrList[0]));
+                    console.log('list '+(arrList.length-1)+' \n '+JSON.stringify(arrList[(arrList.length-1)]));
+                }
+                
+                
                 if(arrList.length>0){
                     var arr = getDataList(arrList);
                 }else{
@@ -168,13 +215,24 @@ function query(mac, from, to , index, limit, flag, callback) {
                 }
 
                 if(arrList == undefined) {
-                    callback(null, false)
+                    return callback(null, false)
                 }
                 else {
-                    callback(null,json)
+                    return callback(null,json)
                 }
             }
-    });
+            else{
+                if(response){
+                    console.log('Code : ' + response.statusCode);
+                    console.log('error : ' + error);
+                    console.log('body : ' + body);
+                }
+                
+                return callback(error, null);
+            }
+        });
+    }
+    
 }
 
 exports.store = store;
@@ -231,23 +289,39 @@ function getDataList(list){
 
 function getData(json){
     var arr = [];
-    var arrData = json._source.data;
-    if( getType(arrData) !== 'array' ){
-        arrData = tmp;
+    var total = json.total;
+    if(isS5_2 !== true){
+        var arrData = json._source.data;
+        var account = json._source.account;
+        var mac = account.mac;
+        var gid = account.gid; 
+        var reportTime = moment(json._source.report_timestamp);
+    }else{
+        var arrData = json.data;
+        var mac = json.macAddr;
+        var gid = json.id;
+        var reportTime = moment(json.created_at);
     }
-    var data = arrData[0];
-    var account = json._source.account;
-    var reportTime = moment(json._source.report_timestamp);
+    
+    if( getType(arrData) === 'array' ){
+        var data = arrData[0];
+    }else if (getType(arrData) === 'object'){
+        var data = arrData;
+    }else{
+        var data = tmp[0];
+    }
+
     var myDate = reportTime.tz(settings.timezone).format('YYYY-MM-DD');
     var myTime = reportTime.tz(settings.timezone).format('HH:mm:ss');
+    var SERVICE_ID = (Number(data.SERVICE_ID)).toString(16);
 
-    arr.push(account.mac);
-    arr.push(account.gid);
+    arr.push(mac);
+    arr.push(gid);
     arr.push(myDate);
     arr.push(myTime);
-    arr.push(data.SERVICE_ID);
+    arr.push(SERVICE_ID);
 
-    var res = data.SERVICE_ID.toUpperCase();
+    var res = SERVICE_ID.toUpperCase();
 
     if(serviceMap[res]){
         arr.push(serviceMap[res]);

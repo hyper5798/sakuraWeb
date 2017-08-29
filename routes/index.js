@@ -6,6 +6,7 @@ var settings = require('../settings');
 var JsonFileTools =  require('../models/jsonFileTools.js');
 var sessionPath = './public/data/session.json';
 var userPath =  './public/data/user.json';
+var devicePath =  './public/data/device.json';
 var moment = require('moment');
 
 function findUnitsAndShowSetting(req,res,isUpdate){
@@ -35,8 +36,37 @@ function findUnitsAndShowSetting(req,res,isUpdate){
 module.exports = function(app) {
   app.get('/', checkLogin);
   app.get('/', function (req, res) {
+		try {
+			var devices = JsonFileTools.getJsonFromFile(devicePath);
+		}
+		catch (event) {
+			devices = [];
+		}
+		
+		try {
+			var sessionObj = JsonFileTools.getJsonFromFile(sessionPath);
+		}
+		catch (event) {
+			sessionObj = {};
+		}
+		var expiration = new Date(sessionObj.expiration);
+		var now = new Date();
+
+		if( sessionObj.expiration === undefined || now.getTime() > expiration.getTime() ){
+			cloud.getToken(
+				function(err,session){
+					if(err){
+						JsonFileTools.saveJsonToFile(sessionPath,{});
+					}else{
+						JsonFileTools.saveJsonToFile(sessionPath,session);
+					}
+				}
+			);
+		}
+		
 		res.render('index', { title: 'Index',
-			user:req.session.user
+			user:req.session.user,
+			devices:devices
 		});
   });
 
@@ -54,20 +84,19 @@ module.exports = function(app) {
 		catch (event) {
 			sessionObj = {};
 		}
-		if(sessionObj.expiration){
-			var expiration = new Date(sessionObj.expiration);
-			var now = new Date();
-			if(now.getTime() > expiration.getTime() || settings.debug === true){
-				cloud.getToken(
-					function(err,session){
-						if(err){
-							JsonFileTools.saveJsonToFile(sessionPath,{});
-						}else{
-							JsonFileTools.saveJsonToFile(sessionPath,session);
-						}
+		var expiration = new Date(sessionObj.expiration);
+		var now = new Date();
+
+		if( sessionObj.expiration === undefined || now.getTime() > expiration.getTime() ){
+			cloud.getToken(
+				function(err,session){
+					if(err){
+						JsonFileTools.saveJsonToFile(sessionPath,{});
+					}else{
+						JsonFileTools.saveJsonToFile(sessionPath,session);
 					}
-				);
-			}
+				}
+			);
 		}
 		errorMessae = '';
 		res.render('user/login', { title: 'Login',
