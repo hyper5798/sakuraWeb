@@ -120,14 +120,39 @@ function store(title, content, city,area,town,callback) {
     });
 }
 
+function DateTimezone(date,offset) {
+    // 建立現在時間的物件
+    // 取得 UTC time
+    var d = new Date(date);
+    utc = d.getTime() - (d.getTimezoneOffset() * 60000);
+    console.log('d.getTimezoneOffset() : '+d.getTimezoneOffset());
+    // 新增不同時區的日期資料
+    if(d.getTimezoneOffset() >= 0)
+        return new Date(utc - (3600000*offset));
+    else
+        return new Date(utc + (3600000*offset));
+    }
+
 function query( mac, from, to , index, limit, flag, callback) {
       
-    var mTo = moment(to,'YYYY/MM/DD HH:mm').tz(settings.timezone);
-    var mFrom = moment(from,'YYYY/MM/DD HH:mm').tz(settings.timezone);
-    var fromTime = mFrom.unix()*1000; 
-    var toTime = mTo.unix()*1000; 
-    var range2 = mTo.format('YYYYMMDDHHmm');
-    var range1 = mFrom.format('YYYYMMDDHHmm');
+    //var mTo = moment(to,'YYYY/MM/DD HH:mm').tz(settings.timezone);
+    //var mFrom = moment(from,'YYYY/MM/DD HH:mm').tz(settings.timezone);
+    //var fromTime = mFrom.unix()*1000; 
+    //var toTime = mTo.unix()*1000; 
+    //var range2 = mTo.format('YYYYMMDDHHmm');
+    //var range1 = mFrom.format('YYYYMMDDHHmm');
+    //var testFrom = new Date(fromTime);
+    //var testTo = new Date(toTime);
+    var mToDate = DateTimezone(to,8);
+    var mFromDate = DateTimezone(from,8);
+    var fromTime = mFromDate.getTime(); 
+    var toTime =mToDate.getTime(); 
+    console.log('from :' + mFromDate.toString());
+    console.log('to   :' + mToDate.toString());
+    console.log('timestamp => from :' + fromTime );
+    console.log('timestamp => to   :' + toTime );
+    var range2 = moment(to,'YYYY-MM-DD HH:mm').format('YYYYMMDDHHmm');
+    var range1 = moment(from,'YYYY-MM-DD HH:mm').format('YYYYMMDDHHmm');
 
     if(range1 === range2){
          var range = range1;
@@ -148,8 +173,8 @@ function query( mac, from, to , index, limit, flag, callback) {
                     callback(err, null);
                 }
                 else {
-                    console.log('result : '+JSON.stringify(result));
-                    console.log('body type : '+typeof(result.body));
+                    //console.log('result : '+JSON.stringify(result));
+                    //console.log('body type : '+typeof(result.body));
                     var body= JSON.parse(result.body);
                     //console.log(JSON.stringify(body));
                     var json = body.hits;
@@ -189,7 +214,7 @@ function query( mac, from, to , index, limit, flag, callback) {
         
         request.get(options, function(error, response, body){
             if (!error && response.statusCode == 200){
-                console.log('body : ' + body+ ', type : '+typeof(body));
+                //console.log('body : ' + body+ ', type : '+typeof(body));
                 var json = JSON.parse(body);
                 var arrList = json.value;
                 var total = json.total;
